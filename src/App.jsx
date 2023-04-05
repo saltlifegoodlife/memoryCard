@@ -1,16 +1,19 @@
 import { useState } from "react";
 import "./App.css";
 import Counter from "./components/Counter";
+import Modal from "./components/modal";
 
 function App() {
   const [currScore, setCurrScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
-  // const [sequenceNum, setSequenceNum] = useState();
   const [sequence, setSequence] = useState([]);
-  const [checkArr, setCheckArr] = useState([]);
-  const [newArr, setNewArr] = useState([]);
+  const [temp, setTemp] = useState([]);
   const [show, setShow] = useState(false);
-  const [count, setCount] = useState();
+  const [count, setCount] = useState(0);
+  const [showGame, setShowGame] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [final, setFinal] = useState("");
+
   function shuffle(array) {
     let currentIndex = array.length,
       randomIndex;
@@ -29,55 +32,151 @@ function App() {
   }
 
   let handleStart = () => {
+    setCurrScore(0);
+    setCount(0);
+    setShowGame(false);
     setShow(true);
     let seq = [...Array(5)].map(() => Math.floor(Math.random() * 15));
     setSequence(seq);
     let chec = [...Array(5)].map(() => Math.floor(Math.random() * 15));
-    setCheckArr(chec);
-    let arr = sequence.concat(checkArr);
-    setNewArr(arr);
+
+    let arr = seq.concat(chec);
+    console.log(arr);
+    arr = shuffle(arr);
+    setTemp(arr);
   };
 
-  console.log("this is newArr: ", newArr);
-
+  //might be in new component
   let handleComparison = (answer) => {
-    // const found = item.some((r) => newArr.indexOf(r) > 0);
-    if (true) {
-    } else {
+    //if true check if item IS in sequence
+    //if false check if item is NOT in sequence
+    console.log(answer);
+    console.log(count);
+    console.log(currScore);
+    if (count <= temp.length - 1) {
+      let test = temp[count];
+      if (answer) {
+        let result = sequence.some((num) => num === test);
+        if (result) {
+          setCurrScore(currScore + 1);
+          setCount(count + 1);
+        } else {
+          if (currScore > 0) {
+            setCurrScore(currScore - 1);
+            setCount(count + 1);
+          } else {
+            setCurrScore(0);
+            setCount(count + 1);
+          }
+        }
+      } else {
+        let result = sequence.some((num) => num === test);
+        if (result) {
+          if (currScore > 0) {
+            setCurrScore(currScore - 1);
+            setCount(count + 1);
+          } else {
+            setCurrScore(0);
+            setCount(count + 1);
+          }
+        } else {
+          setCurrScore(currScore + 1);
+          setCount(count + 1);
+        }
+      }
     }
-    // get sequence and newArr and compare each answer client selects
+    if (count === 9) {
+      console.log(count);
+      if (currScore < highScore) {
+        //add modal with score with replay button
+        setFinal("");
+      } else if (currScore > highScore) {
+        //add modal beat high score! with play again button.
+        setHighScore(currScore);
+        setFinal("beat");
+      } else {
+        //if player hits 10 points, PERFECT SCORE! add modal with play again button.
+        setHighScore(10);
+        setCurrScore(0);
+        setFinal("perfect");
+      }
+      setModalShow(true);
+    }
   };
 
-  let handleGame = () => {};
-
-  let handleCurrentScore = () => {};
-
-  let handleHighScore = () => {};
+  let showGameTask = (e) => {
+    setShow(false);
+    setTimeout(() => {
+      setShowGame(e);
+    }, 2000);
+  };
 
   let handleResetTask = () => {
     setShow(false);
+    setShowGame(false);
+    setCurrScore(0);
+    setModalShow(false);
+    setCount(0);
   };
 
   return (
     <div className="App">
-      <header>
-        <h1>Memory Game</h1>
-        <h2>Current Score: {currScore}</h2>
-        <h2>High Score: {highScore}</h2>
-      </header>
-      <div id="left-div">
-        <button onClick={handleStart}>Start</button>
-        <button onClick={handleResetTask}>Reset</button>
-        <Counter sequence={sequence} />
-      </div>
-      <p>{sequence}</p>
-      <p>{checkArr}</p>
-      <p>{newArr}</p>
-      <div id="right-div">
-        <p>Watch and Remember the Sequence</p>
-        <p>Was this number in the sequence?</p>
-        <button onClick={handleComparison(true)}>YES</button>
-        <button onClick={handleComparison(false)}>NO</button>
+      <div className="main">
+        <header className="head">
+          <h1>Memory Game</h1>
+          <h2>Current Score: {currScore}</h2>
+          <h2>High Score: {highScore}</h2>
+        </header>
+        <div className="content">
+          <div id="left-div">
+            <div className="left-inner">
+              {show && <Counter sequence={sequence} showGame={showGameTask} />}
+              {showGame && (
+                <div>
+                  <h1>{temp[count]}</h1>
+                </div>
+              )}
+              <div className="button-div">
+                <button className="button-79" onClick={handleStart}>
+                  Start
+                </button>
+                <button className="button-79 red" onClick={handleResetTask}>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="right-div">
+            <p>"Watch and Remember the Sequence"</p>
+            {showGame && (
+              <div>
+                <p>Was this number in the sequence?</p>
+                <div className="button-div">
+                  <button
+                    className="button-79"
+                    onClick={() => {
+                      handleComparison(true);
+                    }}
+                  >
+                    YES
+                  </button>
+                  <button
+                    className="button-79 red"
+                    onClick={() => {
+                      handleComparison(false);
+                    }}
+                  >
+                    NO
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        {modalShow && (
+          <Modal final={final} curr={currScore} handleReset={handleResetTask} />
+        )}
       </div>
     </div>
   );
