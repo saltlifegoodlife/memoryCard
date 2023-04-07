@@ -90,7 +90,7 @@ function App() {
       if (currScore < highScore) {
         //add modal with score with replay button
         setFinal("");
-      } else if (currScore > highScore) {
+      } else if (currScore > highScore && currScore < 10) {
         //add modal beat high score! with play again button.
         setHighScore(currScore);
         setFinal("beat");
