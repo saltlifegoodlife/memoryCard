@@ -50,10 +50,9 @@ function App() {
   let handleComparison = (answer) => {
     //if true check if item IS in sequence
     //if false check if item is NOT in sequence
+    let wrong = 0;
     console.log(answer);
-    console.log(count);
-    console.log(currScore);
-    if (count <= temp.length - 1) {
+    if (count <= temp.length) {
       let test = temp[count];
       if (answer) {
         let result = sequence.some((num) => num === test);
@@ -64,9 +63,11 @@ function App() {
           if (currScore > 0) {
             setCurrScore(currScore - 1);
             setCount(count + 1);
+            wrong++;
           } else {
             setCurrScore(0);
             setCount(count + 1);
+            wrong++;
           }
         }
       } else {
@@ -75,9 +76,11 @@ function App() {
           if (currScore > 0) {
             setCurrScore(currScore - 1);
             setCount(count + 1);
+            wrong++;
           } else {
             setCurrScore(0);
             setCount(count + 1);
+            wrong++;
           }
         } else {
           setCurrScore(currScore + 1);
@@ -85,20 +88,22 @@ function App() {
         }
       }
     }
+    console.log(count);
+    console.log(currScore);
     if (count === 9) {
-      console.log(count);
-      if (currScore < highScore) {
+      console.log(currScore);
+      if (currScore === 9 && wrong === 0) {
         //add modal with score with replay button
-        setFinal("");
-      } else if (currScore > highScore && currScore < 10) {
+        setHighScore(10);
+        setCurrScore(0);
+        setFinal("perfect");
+      } else if (currScore > highScore) {
         //add modal beat high score! with play again button.
         setHighScore(currScore);
         setFinal("beat");
       } else {
         //if player hits 10 points, PERFECT SCORE! add modal with play again button.
-        setHighScore(10);
-        setCurrScore(0);
-        setFinal("perfect");
+        setFinal("");
       }
       setModalShow(true);
     }
